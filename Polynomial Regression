@@ -1,0 +1,75 @@
+Position_Salaries=Position_Salaries[2:3]
+Position_Salaries
+
+#fitting Linear regression
+lin_reg=lm(formula = Salary~.,data=Position_Salaries)
+summary(lin_reg)
+
+
+Call:
+lm(formula = Salary ~ ., data = Position_Salaries)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-170818 -129720  -40379   65856  386545 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)   
+(Intercept)  -195333     124790  -1.565  0.15615   
+Level          80879      20112   4.021  0.00383 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 182700 on 8 degrees of freedom
+Multiple R-squared:  0.669,	Adjusted R-squared:  0.6277 
+F-statistic: 16.17 on 1 and 8 DF,  p-value: 0.003833
+
+#fitting poly regression
+
+Position_Salaries$Level1=Position_Salaries$Level^2
+Position_Salaries$Level2=Position_Salaries$Level^3
+poly_reg=lm(formula = Salary~.,data = Position_Salaries)
+
+summary(poly_reg)
+
+Call:
+lm(formula = Salary ~ ., data = data)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-75695 -28148   7091  29256  49538 
+
+Coefficients:
+             Estimate Std. Error t value Pr(>|t|)   
+(Intercept) -121333.3    97544.8  -1.244  0.25994   
+Level        180664.3    73114.5   2.471  0.04839 * 
+Level1       -48549.0    15081.0  -3.219  0.01816 * 
+Level2         4120.0      904.3   4.556  0.00387 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 50260 on 6 degrees of freedom
+Multiple R-squared:  0.9812,	Adjusted R-squared:  0.9718 
+F-statistic: 104.4 on 3 and 6 DF,  p-value: 1.441e-05
+
+#plotting the linear graph
+
+library(ggplot2)
+ggplot()+
+  geom_point(aes(x=Position_Salaries$Level,y=Position_Salaries$Salary),color='red')+
+  geom_line(aes(x=Position_Salaries$Level,y=predict(lin_reg,newdata = Position_Salaries)),color='blue')+
+  ggtitle('truth or bluff(linear regression')+xlab('levels')+ylab('Salary')
+  
+#plotting the poly graph
+
+library(ggplot2)
+ggplot()+
+  geom_point(aes(x=Position_Salaries$Level,y=Position_Salaries$Salary),color='red')+
+  geom_line(aes(x=Position_Salaries$Level,y=predict(poly_reg,newdata = Position_Salaries)),color='blue')+
+  ggtitle('truth or bluff(poly regression')+xlab('levels')+ylab('Salary')
+  
+ #predict linear regression
+ y_pred=predict(lin_reg,newdata=data.frame(Level=6.5))
+ 
+ #predict polynomial regression
+ y_pred=predict(poly_reg,newdata=data.frame(Level=6.5,Level2=6.5^2,Level3=6.5^3))
