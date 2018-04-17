@@ -1,0 +1,16 @@
+Position_Salaries<-Position_Salaries[2:3]
+
+#fitting the SVR
+library(e1071)
+regressor=svm(formula=Salary~.,data=Position_Salaries,type='eps-regression')
+
+#predict
+y_predict=predict(regressor,data.frame(Level=6.5))
+
+#plot SVR
+library(ggplot2)
+ggplot()+
+  geom_point(aes(x=Position_Salaries$Level,y=Position_Salaries$Salary),color='red')+
+  geom_line(aes(x=Position_Salaries$Level,y=predict(regressor,newdata = Position_Salaries)),color='blue')+
+  ggtitle('truth or bluff(svr)')+
+  xlab('level')+ylab('salary')
