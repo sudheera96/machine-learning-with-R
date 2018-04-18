@@ -1,0 +1,31 @@
+plot(Position_Salaries)
+Position_Salaries<-Position_Salaries[2:3]
+
+#fitting the Decision tree regression
+library(rpart)
+regressor=rpart(formula = Salary~.,data = Position_Salaries,control = rpart.control(minsplit = 1))
+
+#predict
+y_predict=predict(regressor,data.frame(Level=6.5))
+
+
+#plotting the decision tree
+library(ggplot2)
+ggplot()+
+  geom_point(aes(x=Position_Salaries$Level,y=Position_Salaries$Salary),color='red')+
+  geom_line(aes(x=Position_Salaries$Level,y=predict(regressor,newdata = Position_Salaries)),color='blue')+
+  ggtitle('truth or bluff(decision tree regression)')+
+  xlab('level')+
+  ylab('salary')
+  
+#plotting the decision tree with high resolution
+library(ggplot2)
+x_grid=seq(min(Position_Salaries$Level),max(Position_Salaries$Level),0.1)
+ggplot()+
+  geom_point(aes(x=Position_Salaries$Level,y=Position_Salaries$Salary),color='red')+
+  geom_line(aes(x=Position_Salaries$Level,y=predict(regressor,newdata = Position_Salaries)),color='blue')+
+  ggtitle('truth or bluff(decision tree regression)')+
+  xlab('level')+
+  ylab('salary')
+  
+  
