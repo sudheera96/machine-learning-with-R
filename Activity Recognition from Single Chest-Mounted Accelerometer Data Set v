@@ -1,0 +1,25 @@
+setwd("C:/Users/ADMIN/Desktop/1.csv")
+data1<-read.csv(file = "C:/Users/ADMIN/Desktop/1.csv",header = FALSE)
+is.na(data1)
+table(data1$V5)
+str(table)
+
+data1<-data1[2:5]
+library(caTools)
+set.seed(123)
+split=sample.split(data1$V5,SplitRatio = 0.98)
+train=subset(data1,split==TRUE)
+test=subset(data1,split==FALSE)
+
+train[-4]=scale(train[-4])
+test[-4]=scale(test[-4])
+
+library(class)
+y_pred=knn(train = train[,-4],test = test[,-4],cl=train[,4],k=5,prob = TRUE)
+
+cm<-table(y_pred,test[,4])
+
+
+
+library(caret)
+confusionMatrix(cm[-1,])
