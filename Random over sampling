@@ -1,0 +1,53 @@
+install.packages('ROSE')
+library(ROSE)
+data(hacide)
+str(hacide.train)
+table(hacide.train$cls)
+prop.table(table(hacide.train$cls))
+
+library(rpart)
+tree<-rpart(cls~.,data = hacide.train)
+predict.tree<-predict(tree,newdata = hacide.test)
+
+accuracy.meas(hacide.test$cls,predict.tree[,2])
+
+roc.curve(hacide.test$cls,predict.tree[,2],plotit = FALSE)
+
+data.balance_over<- ovun.sample(cls~.,data = hacide.train,method = 'over',N=1960)$data
+table(data.balance_over$cls)
+
+data.balance_under<-ovun.sample(cls~.,data = hacide.train,method = 'under',N=40)$data
+table(data.balance_under$cls)
+
+data.balance_both<-ovun.sample(cls~.,data = hacide.train,method = 'both',p=0.5)$data
+table(data.balance_both$cls)
+
+data.rose<-ROSE(cls~.,data = hacide.train,seed = 1)$data
+table(data.rose$cls)
+
+
+tree.rose<-rpart(cls~.,data = data.rose)
+predict.rose<-predict(tree.rose,newdata = hacide.test)
+accuracy.meas(hacide.test$cls,predict.rose[,2])
+roc.curve(hacide.test$cls,predict.rose[,2])
+
+tree.over<-rpart(cls~.,data = data.balance_over)
+predict.over<-predict(tree.over,newdata = hacide.test)
+accuracy.meas(hacide.test$cls,predict.over[,2])
+roc.curve(hacide.test$cls,predict.over[,2])
+
+tree.under<-rpart(cls~.,data = data.balance_under)
+predict.under<-predict(tree.under,newdata = hacide.test)
+accuracy.meas(hacide.test$cls,predict.under[,2])
+roc.curve(hacide.test$cls,predict.under[,2])
+
+tree.both<-rpart(cls~.,data = data.balance_both)
+predict.both<-predict(tree.both,newdata = hacide.test)
+accuracy.meas(hacide.test$cls,predict.both[,2])
+roc.curve(hacide.test$cls,predict.both[,2])
+
+rose.holdout<-ROSE.eval(cls~.,data=hacide.train,learner = rpart,method.assess ='holdout',extr.pred = function(obj)obj[,2],seed = 1)
+rose.holdout
+
+rose.boot<-ROSE.eval(cls~.,data=hacide.train,learner = rpart,method.assess ='BOOT',extr.pred = function(obj)obj[,2],seed = 1)
+rose.boot
