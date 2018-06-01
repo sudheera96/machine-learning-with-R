@@ -1,0 +1,64 @@
+set.seed(123)
+library(data.table)
+gb<- tail(fread("C:/Users/ADMIN/Desktop/GBvideos.csv",encoding = "UTF-8",nrows = 1000),500)
+gb[,"Location":="GB"]
+fr<- tail(fread("C:/Users/ADMIN/Desktop/FRvideos.csv",encoding = "UTF-8",nrows = 1000),500)
+fr[,"Location":="FR"]
+ca<- tail(fread("C:/Users/ADMIN/Desktop/CAvideos.csv",encoding = "UTF-8",nrows = 1000),500)
+ca[,"Location":="CA"]
+us<- tail(fread("C:/Users/ADMIN/Desktop/USvideos.csv",encoding = "UTF-8",nrows = 1000),500)
+us[,"Location":="US"]
+de<- tail(fread("C:/Users/ADMIN/Desktop/DEvideos.csv",encoding = "UTF-8",nrows = 1000),500)
+de[,"Location":="DE"]
+
+videos<-as.data.table(rbind(gb,fr,ca,us,de))
+library(lubridate)
+videos$trending_data<-ydm(videos$trending_date)
+videos$publish_time<-ymd(substr(videos$publish_time,start = 1,stop = 0))
+videos$dif_days<- videos$trending_date - videos$publish_time
+videos$dif_days <- videos$trending_date-videos$publish_time
+
+library(corrplot)
+corrplot.mixed(corr = cor(videos[,c('category_id','views','likes','dislikes','comment_count')]))
+
+mvideo<-videos[,.("Total_Views"=round(max(views,na.rm = TRUE),digits = 2)),by=.(title,thumbnail_link)][order(-Total_Views)]
+library(dplyr)
+library(DT)
+library(stringr)
+mvideo %>% 
+  mutate(image=paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>'))%>%
+  arrange(-Total_Views)%>%
+  top_n(10,wt=Total_Views)%>%
+  select(image,title,Total_Views)%>%
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+mvideo<-videos[,.("Total_Likes"=round(max(likes,na.rm = TRUE),digits = 2)),by=.(title,thumbnail_link)][order(-Total_Likes)]
+mvideo %>% 
+  mutate(image=paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>'))%>%
+  arrange(-Total_Likes)%>%
+  top_n(10,wt=Total_Likes)%>%
+  select(image,title,Total_Likes)%>%
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+mvideo<-videos[,.("Total_Dislikes"=round(max(dislikes,na.rm = TRUE),digits = 2)),by=.(title,thumbnail_link)][order(-Total_Dislikes)]
+mvideo %>% 
+  mutate(image=paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>'))%>%
+  arrange(-Total_Dislikes)%>%
+  top_n(10,wt=Total_Dislikes)%>%
+  select(image,title,Total_Dislikes)%>%
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+mvideo<-videos[,.("Total_comment"=round(max(comment_count,na.rm = TRUE),digits = 2)),by=.(title,thumbnail_link)][order(-Total_comment)]
+mvideo %>% 
+  mutate(image=paste0('<img width="80%" height="80%" src="', thumbnail_link , '"></img>'))%>%
+  arrange(-Total_comment)%>%
+  top_n(10,wt=Total_comment)%>%
+  select(image,title,Total_comment)%>%
+  datatable(class = "nowrap hover row-border", escape = FALSE, options = list(dom = 't',scrollX = TRUE, autoWidth = TRUE))
+
+library(ggplot2)
+library(ggrepel)
+
+ggplot(videos[,.N,by=channel_title][order(-N)][1:10],aes(reorder(channel_title),-N),N,fill=channel_title))+
+  geom_bar(stat = 'identity')++geom_label(aes(label=N))+guides(fill="none")+theme(axis.text.x = element_text(angle = 45,hjust = 1))+  labs(caption="Donyoe",title=" Top trending channel titles in all countries")+
+  xlab(NULL)+ylab(NULL)+coord_flip()
