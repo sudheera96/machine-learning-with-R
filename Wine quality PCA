@@ -1,0 +1,18 @@
+df<-winequality.white
+dim(df)
+head(df)
+dfpca<-prcomp(df,scale. = TRUE)
+summary(dfpca)
+plot(dfpca)
+screeplot(dfpca,type = 'lines')
+biplot(dfpca)
+library(ggplot2)
+install.packages('devtools')
+library(devtools)
+install_github("vqv/ggbiplot")
+
+library(ggbiplot)
+
+ggbiplot(dfpca, obs.scale = 1, var.scale = 1, ellipse = TRUE, circle = TRUE) +
+  scale_color_discrete(name = '') 
+biplot(dfpca, expand = 10, xlim=c(-0.5, 0.5), ylim=c(-0.5, 0.5))
